@@ -10,6 +10,7 @@ struct GaslessSwapParams {
     uint256[] amountInSpecified;
     bytes[] payloads;
     GaslessSwapIntent intent;
+    bytes32 code;
 }
 
 /**
@@ -44,6 +45,7 @@ struct DirectSwapParams {
     address recipient;
     uint256 amountOutMin;
     uint256 deadline;
+    bytes32 code;
 }
 
 /**

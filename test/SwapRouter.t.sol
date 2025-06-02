@@ -46,7 +46,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
         uint256 amountIn,
         uint256 amountOut,
         bool isTokenInEth,
-        bool isTokenOutEth
+        bool isTokenOutEth,
+        bytes32 code
     );
 
     event GaslessSwapLog(
@@ -57,7 +58,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
         address tokenOut,
         uint256 amountIn,
         uint256 amountOut,
-        bool isTokenOutEth
+        bool isTokenOutEth,
+        bytes32 code
     );
 
     IAllowanceTransfer public permit2;
@@ -104,6 +106,7 @@ contract SwapRouterTest is Test, DeployPermit2 {
         // solhint-disable-next-line max-line-length
         "GaslessSwapIntent(bool isTokenOutEth,address tokenIn,address tokenOut,address owner,address recipient,address authorizedSender,address feeToken,uint256 amountIn,uint256 amountOutMin,uint128 maxFee,uint256 nonce,uint256 deadline)"
     );
+    bytes32 public constant EMPTY_CODE = keccak256("");
 
     address _owner;
     uint256 private constant _ownerPrivateKey = 0x12345;
@@ -488,7 +491,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         token0.approve(address(swapRouter), amountIn);
@@ -586,7 +590,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         // Should revert if swapParams.tokenIn is not WETH
@@ -671,7 +676,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         weth.deposit{value: amountIn}();
@@ -733,7 +739,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         swapParams.tokenOut = tokenIn;
@@ -814,7 +821,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         token0.approve(address(swapRouter), amountIn);
@@ -891,7 +899,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         uint256 userPreBalance = address(this).balance;
@@ -960,7 +969,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         weth.deposit{value: amountIn}();
@@ -1023,7 +1033,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         token0.approve(address(swapRouter), amountIn);
@@ -1118,7 +1129,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         // Should revert if amountIn of first swap is 0
@@ -1221,7 +1233,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         uint256 userPreBalance = address(this).balance;
@@ -1318,7 +1331,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         weth.deposit{value: amountIn}();
@@ -1427,7 +1441,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             tokenOut,
             recipient,
             amountOutMin,
-            deadline
+            deadline,
+            EMPTY_CODE
         );
 
         token0.approve(address(swapRouter), amountIn);
@@ -1444,7 +1459,9 @@ contract SwapRouterTest is Test, DeployPermit2 {
             assertEq(token3.balanceOf(recipient), 0);
 
             vm.expectEmit(false, false, false, true);
-            emit DirectSwapLog(address(this), recipient, tokenIn, tokenOut, amountIn, amountOut, false, false);
+            emit DirectSwapLog(
+                address(this), recipient, tokenIn, tokenOut, amountIn, amountOut, false, false, EMPTY_CODE
+            );
             amountOut = swapRouter.swap(swapParams);
             assert(amountOut >= amountOutMin);
             assertEq(token3.balanceOf(recipient), amountOut);
@@ -1551,7 +1568,7 @@ contract SwapRouterTest is Test, DeployPermit2 {
         (bytes memory ownerSignature,) = _getIntentsSignatureAndHash(_ownerPrivateKey, gaslessSwapIntent);
 
         GaslessSwapParams memory swapParams =
-            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, gaslessSwapIntent);
+            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, gaslessSwapIntent, EMPTY_CODE);
 
         vm.expectRevert(ValantisSwapRouter.ValantisSwapRouter___gaslessSwap_insufficientAmountOut.selector);
         swapRouter.gaslessSwap(swapParams, ownerSignature, gaslessSwapIntent.maxFee);
@@ -1576,7 +1593,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
 
         (ownerSignature,) = _getIntentsSignatureAndHash(_ownerPrivateKey, gaslessSwapIntent);
 
-        swapParams = GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, gaslessSwapIntent);
+        swapParams =
+            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, gaslessSwapIntent, EMPTY_CODE);
 
         vm.chainId(123);
 
@@ -1604,7 +1622,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
                 swapParams.intent.tokenOut,
                 swapParams.intent.amountIn,
                 amountOut,
-                false
+                false,
+                EMPTY_CODE
             );
             amountOut = swapRouter.gaslessSwap(swapParams, ownerSignature, gaslessSwapIntent.maxFee);
             assertEq(token3.balanceOf(recipient), amountOut);
@@ -1718,7 +1737,7 @@ contract SwapRouterTest is Test, DeployPermit2 {
         (bytes memory ownerSignature,) = _getIntentsSignatureAndHash(_ownerPrivateKey, gaslessSwapIntent);
 
         GaslessSwapParams memory swapParams =
-            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, gaslessSwapIntent);
+            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, gaslessSwapIntent, EMPTY_CODE);
 
         swapParams.intent.tokenOut = address(token2);
         // Should revert if tokenOut is not WETH
@@ -1755,7 +1774,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
             swapParams.intent.tokenOut,
             swapParams.intent.amountIn,
             amountOut,
-            true
+            true,
+            EMPTY_CODE
         );
         amountOut = swapRouter.gaslessSwap(swapParams, ownerSignature, gaslessSwapIntent.maxFee);
         // Recipient must receive amountOut of ETH
@@ -1833,8 +1853,10 @@ contract SwapRouterTest is Test, DeployPermit2 {
         bytes[] memory signatures = new bytes[](2);
         uint128[] memory fees = new uint128[](2);
 
-        params[0] = GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, firstGaslessSwapIntent);
-        params[1] = GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, secondGaslessSwapIntent);
+        params[0] =
+            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, firstGaslessSwapIntent, EMPTY_CODE);
+        params[1] =
+            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, secondGaslessSwapIntent, EMPTY_CODE);
 
         signatures[0] = firstSignature;
         signatures[1] = secondSignature;
@@ -1849,8 +1871,10 @@ contract SwapRouterTest is Test, DeployPermit2 {
         signatures = new bytes[](2);
         fees = new uint128[](2);
 
-        params[0] = GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, firstGaslessSwapIntent);
-        params[1] = GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, secondGaslessSwapIntent);
+        params[0] =
+            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, firstGaslessSwapIntent, EMPTY_CODE);
+        params[1] =
+            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, secondGaslessSwapIntent, EMPTY_CODE);
 
         signatures[0] = firstSignature;
         signatures[1] = secondSignature;
@@ -1859,7 +1883,8 @@ contract SwapRouterTest is Test, DeployPermit2 {
         swapRouter.batchGaslessSwaps(params, signatures, fees);
 
         firstGaslessSwapIntent.amountOutMin = amountOutMin;
-        params[0] = GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, firstGaslessSwapIntent);
+        params[0] =
+            GaslessSwapParams(isUniversalPool, pools, amountInSpecified, payloads, firstGaslessSwapIntent, EMPTY_CODE);
 
         (firstSignature,) = _getIntentsSignatureAndHash(_ownerPrivateKey, firstGaslessSwapIntent);
         signatures[0] = firstSignature;
