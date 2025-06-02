@@ -15,7 +15,8 @@ interface IValantisSwapRouter is ISovereignPoolSwapCallback, IUniversalPoolSwapC
         uint256 amountIn,
         uint256 amountOut,
         bool isTokenInEth,
-        bool isTokenOutEth
+        bool isTokenOutEth,
+        bytes32 code
     );
 
     event GaslessSwapLog(
@@ -26,7 +27,8 @@ interface IValantisSwapRouter is ISovereignPoolSwapCallback, IUniversalPoolSwapC
         address tokenOut,
         uint256 amountIn,
         uint256 amountOut,
-        bool isTokenOutEth
+        bool isTokenOutEth,
+        bytes32 code
     );
 
     // solhint-disable-next-line func-name-mixedcase
